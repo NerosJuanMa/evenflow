@@ -12,7 +12,7 @@ async function seedDB() {
     
     // Insertar eventos
     const eventos = [
-      ["Inicio APP", "Creacion del usuario Admin", "2025-01-01 18:00:00", "Admin"],
+      ["Inicio APP", "Creacion del usuario Admin", "2025-01-01 18:00:00", "Admin", ],
       ["Taller de Fotografía", "Aprende fotografía profesional", "2025-03-10 18:00:00", "Taller"],
       ["Concierto Acústico", "Música en vivo", "2025-03-15 20:00:00", "Música"],
       ["Charla de Tecnología", "Tendencias en IA", "2025-04-02 17:30:00", "Conferencia"]
@@ -27,11 +27,20 @@ async function seedDB() {
 
     // Insertar inscripciones de ejemplo
     await pool.query(`
-      INSERT INTO usuarios (nombre, email, evento_id)
+      INSERT INTO usuarios (nombre, email, password, rol)
       VALUES         
-        ('ADMIN', 'jmmudarra@gmail.com', 1),
-        ('Carlos Pérez', 'carlos@example.com', 4),
-        ('Lucía Gómez', 'lucia@example.com', 2);
+        ('ADMIN', 'jmmudarra@gmail.com',123456, 'admin'),
+        ('Carlos Pérez', 'carlos@example.com',123456, 'user'),
+        ('Lucía Gómez', 'lucia@example.com',123456, 'user');
+    `);
+
+    // Insertar asistencias de ejemplo
+    await pool.query(`
+      INSERT INTO asistentes (evento_id, usuario_id, estado)
+      VALUES         
+        ('1', '1', 'pendiente'),
+        ('1', '2', 'pendiente'),
+        ('2', '1', 'pendiente');
     `);
 
     console.log("✅ Datos insertados correctamente.");

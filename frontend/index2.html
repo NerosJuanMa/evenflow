@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventFlow - Gestión de Eventos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: #222;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #283593;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+        }
+
+        .topbar h1 {
+            font-size: 1.4rem;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1rem;
+        }
+
+        .card h2 {
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 1rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        input,
+        textarea,
+        select {
+            padding: 0.45rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid #c5cae9;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 4px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #3949ab;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #e53935;
+            color: #fff;
+        }
+
+        .btn-small {
+            padding: 0.25rem 0.45rem;
+            font-size: 0.8rem;
+        }
+
+        #eventos-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .event-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 0.8rem;
+            background: #fafafa;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .event-meta {
+            font-size: 0.85rem;
+            color: #555;
+            margin: 0.2rem 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            color: #fff;
+            margin-left: 0.3rem;
+        }
+
+        .badge-admin {
+            background: #f4511e;
+        }
+
+        .badge-mine {
+            background: #43a047;
+        }
+
+        .badge-inscrito {
+            background: #1e88e5;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .alert {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .alert.show {
+            transform: translateX(0);
+        }
+
+        #auth-section {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            #auth-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .topbar {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>🎉 EventFlow</h1>
+        <div id="user-info" class="user-info">
+            <span id="user-role"></span>
+            <button id="logout-btn" class="btn btn-secondary" style="display:none;">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Auth Section -->
+        <section id="auth-section">
+            <div class="card">
+                <h2>👤 Iniciar sesión</h2>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required />
+                    <input type="password" id="login-password" placeholder="Contraseña" required />
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>➕ Nuevo usuario</h2>
+                <form id="register-form">
+                    <input type="text" id="register-name" placeholder="Nombre completo" required />
+                    <input type="email" id="register-email" placeholder="Email" required />
+                    <input type="password" id="register-password" placeholder="Contraseña" required />
+                    <button type="submit" class="btn btn-primary">Registrarse</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- App Section -->
+        <section id="app-section" style="display:none;">
+            <div class="grid">
+                <!-- Crear evento -->
+                <div class="card">
+                    <h2>✨ Nuevo Evento</h2>
+                    <form id="evento-form">
+                        <input type="hidden" id="evento-id" />
+                        <input type="text" id="evento-titulo" placeholder="Título del evento" required />
+                        <textarea id="evento-descripcion" placeholder="Descripción completa" required></textarea>
+                        <input type="date" id="evento-fecha" required />
+                        <input type="text" id="evento-lugar" placeholder="Lugar / Dirección" required />
+                        <input type="text" id="evento-categoria" placeholder="Categoría (charla, taller, meetup...)"
+                            required />
+                        <!-- creador_id NO va en el formulario, se pone en el backend/JS según el usuario logueado -->
+                        <button type="submit" class="btn btn-primary">💾 Guardar Evento</button>
+                        <button type="button" id="evento-cancelar" class="btn btn-secondary" style="display:none;">❌
+                            Cancelar</button>
+                    </form>
+                </div>
+                <!-- Lista de eventos -->
+                <div class="card">
+                    <h2>📅 Eventos Disponibles</h2>
+                    <div id="eventos-list">Cargando eventos...</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="alert" class="alert"></div>
+    </main>
+
+    <script>
+        // === CONFIG ===
+        const API_BASE = "http://localhost:3000";
+
+        // === STATE ===
+        let currentUser = null;
+        let eventos = [];
+
+        // === HELPERS ===
+        function getToken() { return localStorage.getItem("eventflow_token"); }
+        function setToken(token) { localStorage.setItem("eventflow_token", token); }
+        function clearToken() { localStorage.removeItem("eventflow_token"); }
+
+        async function apiFetch(path, options = {}) {
+            const token = getToken();
+            const headers = { "Content-Type": "application/json" };
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const res = await fetch(API_BASE + path, { ...options, headers });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Error del servidor");
+            }
+            if (res.status === 204) return null;
+            return res.json();
+        }
+
+        function showAlert(message, isError = false) {
+            const alert = document.getElementById("alert");
+            alert.textContent = message;
+            alert.style.background = isError ? "#e53935" : "#3949ab";
+            alert.classList.add("show");
+            setTimeout(() => alert.classList.remove("show"), 4000);
+        }
+
+        function updateAuthUI() {
+            document.getElementById("auth-section").style.display = currentUser ? "none" : "flex";
+            document.getElementById("app-section").style.display = currentUser ? "block" : "none";
+            document.getElementById("logout-btn").style.display = currentUser ? "inline-block" : "none";
+            document.getElementById("user-role").textContent =
+                currentUser ? `${currentUser.nombre} (${currentUser.rol.toUpperCase()})` : "";
+        }
+
+        // === USUARIO ACTUAL ===
+        async function cargarUsuarioActual() {
+            if (!getToken()) {
+                currentUser = null;
+                updateAuthUI();
+                return;
+            }
+
+            try {
+                currentUser = await apiFetch("/api/usuarios/me");
+                updateAuthUI();
+                await cargarEventos();
+            } catch (err) {
+                clearToken();
+                currentUser = null;
+                updateAuthUI();
+                showAlert("Sesión expirada", true);
+            }
+        }
+
+        // === EVENTOS ===
+        async function cargarEventos() {
+            try {
+                eventos = await apiFetch("/api/eventos");
+                renderEventos();
+            } catch (err) {
+                showAlert(err.message, true);
+                document.getElementById("eventos-list").textContent = "Error al cargar eventos";
+            }
+        }
+
+        function renderEventos() {
+            const container = document.getElementById("eventos-list");
+            if (!eventos.length) {
+                container.innerHTML = '<div style="padding:2rem;text-align:center;color:#666;">No hay eventos disponibles 😴</div>';
+                return;
+            }
+
+            container.innerHTML = "";
+            eventos.forEach(ev => {
+                const esMio = currentUser && ev.creadorId === currentUser.id;
+                const soyAdmin = currentUser?.rol === "admin";
+                const estoyInscrito = currentUser && ev.asistentesIds?.includes(currentUser.id);
+
+                const card = document.createElement("div");
+                card.className = "event-card";
+
+                card.innerHTML = `
+          <div class="event-header">
+            <div class="event-title">${ev.titulo}</div>
+            <div>
+              ${soyAdmin ? '<span class="badge badge-admin">ADMIN</span>' : ""}
+              ${esMio ? '<span class="badge badge-mine">MÍO</span>' : ""}
+              ${estoyInscrito ? '<span class="badge badge-inscrito">INSCRITO</span>' : ""}
+            </div>
+          </div>
+          <div class="event-meta"><strong>📅 ${ev.fecha}</strong> - ${ev.lugar}</div>
+          <div class="event-meta">${ev.descripcion}</div>
+          <div class="event-actions"></div>
+        `;
+
+                const actions = card.querySelector(".event-actions");
+
+                // Inscribirse/desinscribirse (solo si NO es mío)
+                if (currentUser && !esMio) {
+                    const btn = document.createElement("button");
+                    btn.className = `btn btn-small ${estoyInscrito ? "btn-secondary" : "btn-primary"}`;
+                    btn.textContent = estoyInscrito ? "❌ Desinscribirse" : "✅ Inscribirse";
+                    btn.onclick = () => toggleInscripcion(ev.id, estoyInscrito);
+                    actions.appendChild(btn);
+                }
+
+                // Editar/Eliminar (mío O admin)
+                if (currentUser && (esMio || soyAdmin)) {
+                    const editBtn = document.createElement("button");
+                    editBtn.className = "btn btn-small btn-secondary";
+                    editBtn.textContent = "✏️ Editar";
+                    editBtn.onclick = () => rellenarFormulario(ev);
+                    actions.appendChild(editBtn);
+
+                    const delBtn = document.createElement("button");
+                    delBtn.className = "btn btn-small btn-danger";
+                    delBtn.textContent = "🗑️ Eliminar";
+                    delBtn.onclick = () => eliminarEvento(ev.id);
+                    actions.appendChild(delBtn);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        async function toggleInscripcion(eventoId, yaInscrito) {
+            try {
+                await apiFetch(`/api/asistentes/eventos/${eventoId}/inscribirse`, {
+                    method: yaInscrito ? "DELETE" : "POST"
+                });
+                showAlert(yaInscrito ? "Desinscrito correctamente" : "¡Inscrito! 🎉");
+                await cargarEventos();
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+
+        function rellenarFormulario(ev) {
+            document.getElementById("evento-id").value = ev.id;
+            document.getElementById("evento-titulo").value = ev.titulo;
+            document.getElementById("evento-descripcion").value = ev.descripcion;
+            document.getElementById("evento-fecha").value = ev.fecha.split("T")[0];
+            document.getElementById("evento-lugar").value = ev.lugar;
+            document.getElementById("evento-cancelar").style.display = "inline-block";
+        }
+
+        async function eliminarEvento(id) {
+            if (!confirm("¿Estás seguro de eliminar este evento?")) return;
+            try {
+                await apiFetch(`/api/eventos/${id}`, { method: "DELETE" });
+                showAlert("Evento eliminado ✅");
+                await cargarEventos();
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+
+        // === EVENT LISTENERS ===
+        document.addEventListener("DOMContentLoaded", () => {
+            // Login
+            document.getElementById("login-form").onsubmit = async e => {
+                e.preventDefault();
+                try {
+                    const data = await apiFetch("/api/auth/login", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            email: document.getElementById("login-email").value,
+                            password: document.getElementById("login-password").value
+                        })
+                    });
+                    setToken(data.token);
+                    showAlert("¡Bienvenido! 🎉");
+                    await cargarUsuarioActual();
+                } catch (err) {
+                    showAlert(err.message, true);
+                }
+            };
+
+            // Register
+            document.getElementById("register-form").onsubmit = async e => {
+                e.preventDefault();
+                try {
+                    await apiFetch("/api/auth/register", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            nombre: document.getElementById("register-name").value,
+                            email: document.getElementById("register-email").value,
+                            password: document.getElementById("register-password").value
+                        })
+                    });
+                    showAlert("¡Usuario creado! Ahora inicia sesión 👆");
+                    document.getElementById("register-form").reset();
+                } catch (err) {
+                    showAlert(err.message, true);
+                }
+            };
+
+            // Evento form
+            document.getElementById("evento-form").onsubmit = async e => {
+                e.preventDefault();
+                const id = document.getElementById("evento-id").value;
+
+                const data = {
+                    titulo: document.getElementById("evento-titulo").value,
+                    descripcion: document.getElementById("evento-descripcion").value,
+                    fecha: document.getElementById("evento-fecha").value,
+                    lugar: document.getElementById("evento-lugar").value,
+                    categoria: document.getElementById("evento-categoria").value,
+                    creador_id: currentUser.id  // 👈 AQUÍ se pone automáticamente según el usuario logueado
+                };
+
+                try {
+                    if (id) {
+                        await apiFetch(`/api/eventos/${id}`, {
+                            method: "PUT",
+                            body: JSON.stringify(data)
+                        });
+                        showAlert("Evento actualizado ✅");
+                    } else {
+                        await apiFetch("/api/eventos", {
+                            method: "POST",
+                            body: JSON.stringify(data)
+                        });
+                        showAlert("¡Nuevo evento creado! 🎉");
+                    }
+
+                    document.getElementById("evento-form").reset();
+                    document.getElementById("evento-id").value = "";
+                    document.getElementById("evento-cancelar").style.display = "none";
+                    await cargarEventos();
+                } catch (err) {
+                    showAlert(err.message, true);
+                }
+            };
+
+
+            document.getElementById("evento-cancelar").onclick = () => {
+                document.getElementById("evento-form").reset();
+                document.getElementById("evento-id").value = "";
+                document.getElementById("evento-cancelar").style.display = "none";
+            };
+
+            document.getElementById("logout-btn").onclick = () => {
+                clearToken();
+                currentUser = null;
+                updateAuthUI();
+                showAlert("Sesión cerrada");
+            };
+
+            // Inicializar
+            cargarUsuarioActual();
+        });
+    </script>
+</body>
+
+</html>

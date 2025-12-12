@@ -2,30 +2,73 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>EventFlow</title>
+  <title>EventFlow - Gestión de Eventos</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
+  <header class="topbar">
     <h1>EventFlow</h1>
+    <div id="user-info" class="user-info">
+      <span id="user-role"></span>
+      <button id="logout-btn" class="btn btn-secondary" style="display:none;">Cerrar sesión</button>
+    </div>
   </header>
 
-  <main>
-    <section id="event-list">
-      <h2>Eventos disponibles</h2>
-      <div id="events"></div>
+  <main class="container">
+    <!-- Auth -->
+    <section id="auth-section">
+      <div class="card">
+        <h2>Iniciar sesión</h2>
+        <form id="login-form">
+          <input type="email" id="login-email" placeholder="Email" required />
+          <input type="password" id="login-password" placeholder="Contraseña" required />
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Registro</h2>
+        <form id="register-form">
+          <input type="text" id="register-name" placeholder="Nombre" required />
+          <input type="email" id="register-email" placeholder="Email" required />
+          <input type="password" id="register-password" placeholder="Contraseña" required />
+          <select id="register-rol">
+            <option value="user">Usuario</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Registrarse</button>
+        </form>
+      </div>
     </section>
 
-    <section id="create-event">
-      <h2>Crear nuevo evento</h2>
-      <form id="eventForm">
-        <input type="text" name="titulo" placeholder="Título" required />
-        <textarea name="descripcion" placeholder="Descripción"></textarea>
-        <input type="datetime-local" name="fecha" required />
-        <input type="text" name="categoria" placeholder="Categoría" />
-        <button type="submit">Crear Evento</button>
-      </form>
+    <!-- App -->
+    <section id="app-section" style="display:none;">
+      <div class="grid">
+        <!-- Crear / editar eventos (visible a user y admin) -->
+        <div class="card">
+  <h2>✨ Nuevo Evento</h2>
+  <form id="evento-form">
+    <input type="hidden" id="evento-id" />
+    <input type="text" id="evento-titulo" placeholder="Título del evento" required />
+    <textarea id="evento-descripcion" placeholder="Descripción completa" required></textarea>
+    <input type="date" id="evento-fecha" required />
+    <input type="text" id="evento-lugar" placeholder="Lugar / Dirección" required />
+    <input type="text" id="evento-categoria" placeholder="Categoría (charla, taller, meetup...)" required />
+    <!-- creador_id NO va en el formulario, se pone en el backend/JS según el usuario logueado -->
+    <button type="submit" class="btn btn-primary">💾 Guardar Evento</button>
+    <button type="button" id="evento-cancelar" class="btn btn-secondary" style="display:none;">❌ Cancelar</button>
+  </form>
+</div>
+
+        <!-- Listado de eventos -->
+        <div class="card">
+          <h2>Eventos</h2>
+          <div id="eventos-list"></div>
+        </div>
+      </div>
     </section>
+
+    <div id="alert" class="alert" style="display:none;"></div>
   </main>
 
   <script src="app.js"></script>

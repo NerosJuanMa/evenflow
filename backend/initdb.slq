@@ -1,0 +1,54 @@
+DROP DATABASE IF EXISTS eventflow_db;
+CREATE DATABASE eventflow_db;
+USE eventflow_db;
+
+-- ============================
+-- Tabla: eventos
+-- ============================
+CREATE TABLE eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    fecha DATETIME NOT NULL,
+    categoria VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_evento_fecha ON eventos(fecha);
+
+
+-- ============================
+-- Tabla: usuarios
+-- ============================
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    email VARCHAR(200) NOT NULL,
+    password VARCHAR(150) NOT NULL,
+    rol ENUM('user', 'admin') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_usuario_email (email)
+);
+
+CREATE INDEX idx_usuario_email ON usuarios(email);
+
+
+-- ============================
+-- Tabla: asistentes (relación N:M)
+-- ============================
+CREATE TABLE asistentes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evento_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    estado ENUM('confirmado','pendiente','cancelado') DEFAULT 'pendiente',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    UNIQUE KEY uq_evento_usuario (evento_id, usuario_id),
+    INDEX idx_asist_evento (evento_id),
+    INDEX idx_asist_usuario (usuario_id)
+);
+
+ALTER TABLE usuarios ADD COLUMN rol ENUM('user', 'admin') DEFAULT 'user';

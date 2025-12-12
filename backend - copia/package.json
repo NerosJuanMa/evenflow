@@ -1,0 +1,25 @@
+{
+  "name": "eventflow-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "doc": "jsdoc -c jsdoc.json"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "mysql2": "^3.15.3"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.5",
+    "nodemon": "^2.0.22"
+  },
+  "description": "",
+  "main": "db.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
