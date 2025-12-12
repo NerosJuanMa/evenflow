@@ -14,5 +14,10 @@ export const UsuariosController = {
     const evento_id = req.params.id;
     const usuarios = await UsuariosModel.findByEvent(evento_id);
     res.json(usuarios);
+  },
+
+   async getUsuarios(req, res) {
+    const allusuarios = await UsuariosModel.findAll();
+    res.json(allusuarios);
   }
 };

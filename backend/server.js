@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import eventosRoutes from "./routes/eventos.routes.js";
+import usuariosRoutes from "./routes/usuarios.routes.js";
 import { testConnection } from "./db.js";
 
 dotenv.config();
@@ -23,6 +24,7 @@ testConnection();
 
 // Rutas API
 app.use("/api/eventos", eventosRoutes);
+app.use("/api/usuarios", usuariosRoutes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;

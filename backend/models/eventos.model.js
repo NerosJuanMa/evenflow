@@ -3,7 +3,7 @@ import { pool } from "../db.js";
 
 export const EventosModel = {
   async findAll() {
-    const [rows] = await pool.query("SELECT * FROM eventos ORDER BY fecha ASC");
+    const [rows] = await pool.query("SELECT * FROM eventos WHERE id > 1 ORDER BY fecha ASC");
     return rows;
   },
 

@@ -16,5 +16,10 @@ export const UsuariosModel = {
       [evento_id]
     );
     return rows;
+  },
+
+  async findAll() {
+    const [rows] = await pool.query("SELECT * FROM usuarios");
+    return rows;
   }
 };
