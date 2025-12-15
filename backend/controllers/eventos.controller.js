@@ -7,24 +7,26 @@ export const EventosController = {
       const eventos = await EventosModel.findAll();
       
       // ⭐ AÑADIR asistentesIds
-      const asistentes = await AsistentesModel.findAll();
-      const mapaAsistentes = {};
-      asistentes.forEach(a => {
-        if (!mapaAsistentes[a.evento_id]) mapaAsistentes[a.evento_id] = [];
-        mapaAsistentes[a.evento_id].push(a.usuario_id);
-      });
+      // const asistentes = await AsistentesModel.findAll();
+      // const mapaAsistentes = {};
+      // asistentes.forEach(a => {
+      //   if (!mapaAsistentes[a.evento_id]) mapaAsistentes[a.evento_id] = [];
+      //   mapaAsistentes[a.evento_id].push(a.usuario_id);
+      // });
 
-      const eventosConAsistentes = eventos.map(ev => ({
-        id: ev.id,
-        titulo: ev.titulo,
-        descripcion: ev.descripcion,
-        fecha: ev.fecha,
-        lugar: ev.lugar || ev.categoria, // adaptado a tu modelo
-        creadorId: ev.creador_id,
-        asistentesIds: mapaAsistentes[ev.id] || []
-      }));
+      // const eventosConAsistentes = eventos.map(ev => ({
+      //   id: ev.id,
+      //   titulo: ev.titulo,
+      //   descripcion: ev.descripcion,
+      //   fecha: ev.fecha,
+      //   lugar: ev.lugar,
+      //   categoria: ev.categoria,
+      //   creadorId: ev.creador_id,
+      //   asistentesIds: mapaAsistentes[ev.id] || []
+      // }));
 
-      res.json(eventosConAsistentes);
+      // res.json(eventosConAsistentes);
+      res.json(eventos);
     } catch (error) {
       console.error("Error getAll eventos:", error);
       res.status(500).json({ error: "Error al obtener los eventos" });

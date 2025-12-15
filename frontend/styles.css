@@ -1,176 +1,399 @@
+/*Inicio*/
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Página general */
 body {
-  background: #f4f6fb;
-  color: #222;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+
 }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #283593;
-  color: #fff;
-  padding: 0.8rem 1.5rem;
+/* Contenedor principal */
+main, .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
 }
 
-.topbar h1 {
-  font-size: 1.4rem;
-}
-
-.user-info {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.container {
-  max-width: 1100px;
-  margin: 1.5rem auto;
-  padding: 0 1rem;
-}
-
-.card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 1rem 1.2rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+/* Título */
+h1, h2 {
   margin-bottom: 1rem;
 }
 
-.card h2 {
-  margin-bottom: 0.8rem;
-  font-size: 1.2rem;
-}
-
-.grid {
+/* Grid de eventos */
+#eventos {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+/* Grid de cursos */
+#cursos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
-input, textarea, select {
-  padding: 0.45rem 0.6rem;
-  border-radius: 4px;
-  border: 1px solid #c5cae9;
-  font-size: 0.9rem;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
-.btn {
-  border: none;
-  border-radius: 4px;
-  padding: 0.45rem 0.8rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: #3949ab;
-  color: #fff;
-}
-
-.btn-secondary {
-  background: #e0e0e0;
-  color: #333;
-}
-
-.btn-danger {
-  background: #e53935;
-  color: #fff;
-}
-
-.btn-small {
-  padding: 0.25rem 0.45rem;
-  font-size: 0.8rem;
-}
-
-#eventos-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
+/* Tarjeta de evento */
 .event-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 0.6rem 0.7rem;
-  background: #fafafa;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+/* Tarjeta de Curso */
+.curso-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+/* Imagen del evento */
+.event-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.event-header {
+/* Imagen del curso */
+.curso-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Texto del evento */
+.event-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.event-card p {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+/* Texto del Curso */
+.curso-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.curso-card p {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+/* Curso-centro destacado */
+.curso-card p strong {
+  font-size: 1rem;
+  color: #16a34a;
+}
+/* Precio destacado */
+.event-card p strong {
+  font-size: 1rem;
+  color: #16a34a;
+}
+
+/* ===== FORMULARIOS LOGIN / REGISTRO ===== */
+.auth-container {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.auth-form {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.auth-form h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2d3748;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.auth-toggle {
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
+}
+
+.auth-toggle a {
+  color: #4299e1;
+  text-decoration: none;
+}
+
+.auth-toggle a:hover {
+  text-decoration: underline;
+}
+
+.hidden {
+    display: none; /*oculto si no se dice lo contrario*/
+}
+
+/* ===== HEADER SIMPLE ===== */
+.header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.event-title {
-  font-weight: 600;
+.logo h1 {
+  color: #667eea;
+  font-size: 24px;
+  margin-bottom: 5px;
 }
 
-.event-meta {
-  font-size: 0.8rem;
-  color: #555;
-  margin: 0.2rem 0;
+.logo p {
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  color: #fff;
-  background: #757575;
-}
-
-.badge-admin {
-  background: #f4511e;
-}
-
-.badge-mine {
-  background: #43a047;
-}
-
-.badge-inscrito {
-  background: #1e88e5;
-}
-
-.event-actions {
+.auth-nav {
   display: flex;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
+  align-items: center;
+  gap: 15px;
 }
 
-.alert {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  padding: 0.6rem 0.9rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  background: #3949ab;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+.auth-nav .user-name {
+  color: #4a5568;
+  font-weight: 500;
+}
+/* ============================
+   🛒 ESTILO eventos USUARIOS LOGADOS
+============================ */
+
+/* Contenedor general */
+#eventosSection {
+  background: #fafafa;
+  padding: 25px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  width: 90%;
+  max-width: 1100px;
+  margin: 30px auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+/* Título principal */
+#eventosSection h2 {
+  font-size: 1.7rem;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+/* Cabecera con total + botón */
+.eventos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#eventosSection p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Total del carrito */
+#totalCarrito {
+  color: #0a7a14;
+  font-weight: bold;
+}
+
+/* Layout de dos columnas: eventos a la izquierda, carrito a la derecha */
+.eventos-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Columna izquierda (eventos) */
+.eventos-eventos h3 {
+  margin-bottom: 10px;
+}
+
+/* Grid de eventos */
+#eventoseventos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  margin-top: 10px;
+}
+
+/* Tarjeta de evento */
+#eventoseventos .event-card .curso-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  text-align: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#eventoseventos .event- .curso-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Imagen del evento */
+#eventoseventos img {
+  width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+/* Nombre del evento */
+#eventoseventos h3 {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+/* Botón agregar al carrito */
+#eventoseventos .btn-agregar {
+  margin-top: 10px;
+  background-color: #008f39;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+
+#eventoseventos .btn-agregar:hover {
+  background-color: #006e2b;
+}
+.carrito-borrar {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.carrito-borrar:hover {
+  color: #c00;
+}
+
+/* Columna derecha (carrito) */
+.eventos-carrito {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.eventos-carrito h3 {
+  margin-bottom: 10px;
+}
+
+/* Elementos del carrito */
+.carrito-item {
+
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.carrito-item:last-child {
+  border-bottom: none;
+}
+
+.carrito-item-nombre {
+  flex: 1;
+}
+
+.carrito-item-cantidad {
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.carrito-vacio {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Botón finalizar compra */
+.btn-finalizar {
+  margin: 10px 0 20px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background-color: #0077cc;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-finalizar:hover {
+  background-color: #005fa1;
+}
+
+/* Responsive: en pantallas pequeñas, columnas apiladas */
 @media (max-width: 768px) {
-  .grid {
+  .eventos-layout {
     grid-template-columns: 1fr;
   }
 }

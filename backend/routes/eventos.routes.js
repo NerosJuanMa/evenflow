@@ -10,10 +10,16 @@ const router = Router();
 router.get("/", verifyToken, canViewEvent, EventosController.getAll);
 router.get("/:id", verifyToken, canViewEvent, EventosController.getById);
 router.post("/", verifyToken, canViewEvent, EventosController.create);
+// router.get("/", EventosController.getAll);
+// router.get("/:id", EventosController.getById);
+// router.post("/", EventosController.create);
 
 // editar y eliminar: solo admin
 
 router.put("/:id", verifyToken, canManageEvents, EventosController.update);
 router.delete("/:id", verifyToken, canManageEvents, EventosController.remove);
+
+// router.put("/:id", EventosController.update);
+// router.delete("/:id", EventosController.remove);
 
 export default router;

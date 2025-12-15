@@ -1,20 +1,162 @@
-// === CONFIG ===
-    // const API_BASE = "http://localhost:3000/api";
-    const URL_API = "http://localhost:3000/api";
-// === VARIABLES ESTADO ===
-    let estado = {
-      usuario: null,    // 👤 {id: 1, nombre: "Juan", email: "juan@email.com"}
-      token: null,      // 🔑 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-      eventos: [],
-      carrito: {        // 🛒 {items: [{id:1, nombre:"evento", precio:10, cantidad:2}], total: 20}
-        items: [],
-        total: 0
-      }
-    };
-// === STATE ===
-        let currentUser = null;
-        let eventos = [];
+// =============================
+// 🔧 CONFIGURACIÓN Y ESTADO
+// =============================
 
+/**
+ * URL_API: Dirección del backend donde están nuestras APIs
+ * Cambiar solo el puerto si tu servidor corre en otro puerto
+ */
+const URL_API = "http://localhost:3000/api";
+
+/**
+ * ESTADO GLOBAL: Toda la información importante de la app
+ * Es como la "memoria" de nuestra aplicación
+ * 
+ * - usuario: Datos del usuario logueado (null = no hay usuario)
+ * - token: Clave secreta para comunicarse con el backend
+ * - carrito: Lista de eventos que el usuario quiere comprar
+ */
+let estado = {
+  usuario: null,    // 👤 {id: 1, nombre: "Juan", email: "juan@email.com"}
+  token: null,      // 🔑 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  carrito: {        // 🛒 {items: [{id:1, nombre:"evento", precio:10, cantidad:2}], total: 20}
+    items: [],
+    total: 0
+  }
+};
+
+// =============================
+// 📦 eventos PÚBLICOS
+// (Cualquier persona puede verlos, SIN botón comprar)
+// =============================
+
+/**
+ * verJSON() - Muestra los datos raw del backend; es una funcion de comprobación. Aquí decimos ok mi backend funciona 
+ * y se conecta con mi front. Puedo seguir. 
+ * 
+ * ¿Para qué sirve?
+ * - Debugging: Ver exactamente qué datos envía el servidor
+ * 
+ * 
+ * ¿Cómo funciona?
+ * 1. Hace una petición GET a /api/eventos. 
+ * 2. Convierte la respuesta a JSON
+ * 3. La muestra en el elemento <pre id="listaeventos">
+
+async function verJSON() {
+  try {
+    // fetch() = "Ve y trae los datos de esta URL"
+    const respuesta = await fetch(`${URL_API}/eventos`);
+  
+    const datos = await respuesta.json();
+    
+    // Mostrar los datos en formato JSON legible
+    const salida = document.getElementById("listaeventos");
+    if (salida) {
+      salida.textContent = JSON.stringify(datos, null, 2); // null, 2 = formato bonito
+    }
+  } catch (error) {
+    // Si algo sale mal (internet, servidor caído, etc.)
+    console.error("Error al obtener JSON:", error);
+  }
+}
+ */
+async function verJSON() {
+  try {
+    // 1️⃣ Obtener el token (ajusta si usas sessionStorage o cookies)
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No hay token. Debes iniciar sesión.");
+      return;
+    }
+
+    // 2️⃣ Hacer la petición con Authorization header
+    const respuesta = await fetch(`${URL_API}/eventos`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    // 3️⃣ Manejar error HTTP
+    if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      throw new Error(errorData.mensaje || "Error en la petición");
+    }
+
+    // 4️⃣ Convertir a JSON
+    const datos = await respuesta.json();
+
+    // 5️⃣ Mostrar el JSON bonito
+    const salida = document.getElementById("listaeventos");
+    if (salida) {
+      salida.textContent = JSON.stringify(datos, null, 2);
+    }
+
+  } catch (error) {
+    console.error("Error al obtener JSON:", error.message);
+  }
+}
+
+/**
+ * cargareventos() - Carga y muestra eventos en formato de tarjetas
+ * 
+ * ¿Cuándo se ejecuta?
+ * - Al cargar la página (siempre visible)
+ * - Para usuarios NO logueados (vista pública)
+ * 
+ * ¿Qué hace?
+ * 1. Pide eventos al backend
+ * 2. Si todo va bien, llama a mostrareventos()
+ * 3. Si hay error, lo registra en consola
+ */
+async function cargareventos() {
+  try {
+    const respuesta = await fetch(`${URL_API}/eventos`);
+    const datos = await respuesta.json();
+
+    // Verificar que la petición fue exitosa Y que hay datos
+    if (respuesta.ok && datos.data) {
+      mostrareventos(datos.data); // datos.data = array de eventos
+    } else {
+      console.error("Error al cargar eventos");
+    }
+  } catch (error) {
+    console.error("Error de conexión:", error);
+  }
+}
+
+/**
+ * mostrareventos() - Convierte array de eventos en HTML
+ * 
+ * @param {Array} lista - Array de eventos del backend
+ * Ejemplo: [{id:1, nombre:"Camiseta", precio:20, stock:5}, ...]
+ * 
+ * ¿Qué hace?
+ * 1. Busca el contenedor <div id="eventos">
+ * 2. Convierte cada evento en una tarjeta HTML
+ * 3. Usa .map() para transformar array → HTML
+ * 4. Usa .join() para unir todo en un string
+ */
+function mostrareventos(lista) {
+  const contenedor = document.getElementById("eventos");
+  if (!contenedor) return; // Si no existe el elemento, salir
+
+  // .map() = "Por cada evento, crear este HTML"
+  contenedor.innerHTML = lista.map(evento => `
+    <div class="event-card">
+      <img src="./images/foto.png" class="event-image" alt="${evento.titulo}">
+      <h3>${evento.titulo}</h3>
+      <p>${evento.descripcion}</p>
+      <p>${evento.fecha}</p>
+      <p><strong>${evento.lugar}€</strong></p>
+      <p>Categoria: ${evento.categoria}</p>
+      <p>Creado por: ${evento.creador_id}</p>
+    </div>
+  `).join(""); // .join("") = unir todo sin separadores
+}
 
 // =============================
 // 🔐 SESIÓN: LOGIN / REGISTRO
@@ -46,6 +188,7 @@ function guardarSesion(token, usuario) {
 
   console.log("💾 Sesión guardada para:", usuario.nombre);
 }
+
 /**
  * cerrarSesion() - Limpia toda la información del usuario
  * 
@@ -72,6 +215,7 @@ function cerrarSesion() {
   console.log("👋 Sesión cerrada");
   mostrarInterfaz(); // Actualizar la interfaz
 }
+
 /**
  * cargarSesionGuardada() - Restaura sesión al recargar página
  * 
@@ -100,6 +244,7 @@ function cargarSesionGuardada() {
     }
   }
 }
+
 /**
  * iniciarSesion() - Autentica usuario con email/password
  * 
@@ -137,6 +282,7 @@ async function iniciarSesion(email, password) {
     alert("No se pudo conectar con el servidor");
   }
 }
+
 /**
  * registrarUsuario() - Crea cuenta nueva y loguea automáticamente
  * 
@@ -177,7 +323,7 @@ async function registrarUsuario(nombre, email, password) {
 
 // =============================
 // 🎛 INTERFAZ DE USUARIO. 
-// (Mostrar/ocultar secciones según si el usuario esta logado o no: muestra los productos para comprar)
+// (Mostrar/ocultar secciones según si el usuario esta logado o no: muestra los eventos para comprar)
 //Aqui ya hemos introducido cambios para mostrar una interfaz diferente cuando el usuario se loga
 // =============================
 
@@ -191,15 +337,15 @@ async function registrarUsuario(nombre, email, password) {
  * 
  * ¿Qué hace?
  * - Decide qué mostrar según si hay usuario logueado
- * - Usuario NO logueado: formularios login/registro y productos como catalogo
- * - Usuario SÍ logueado: tienda privada + navegación
+ * - Usuario NO logueado: formularios login/registro y eventos como catalogo
+ * - Usuario SÍ logueado: eventos privada + navegación
  */
 function mostrarInterfaz() {
   // Buscar elementos del DOM
   const authSection   = document.getElementById("authSection");   // Formularios login/registro
   const authNav       = document.getElementById("authNav");       // Barra superior
-  const tiendaSection = document.getElementById("tiendaSection"); // Tienda para usuarios logados 
-  const productosMostrar   = document.getElementById("productosMostrar"); // Muestra productos para usuarios NO logados 
+  const eventosSection = document.getElementById("eventosSection"); // eventos para usuarios logados 
+  const eventosMostrar   = document.getElementById("eventosMostrar"); // Muestra eventos para usuarios NO logados 
   
   const logueado = !!estado.usuario; // nace como null que es false pero no un boolean aqui lo que hace es convertirlo en un boolean
 
@@ -208,21 +354,21 @@ function mostrarInterfaz() {
   if (authSection) {
     authSection.classList.toggle("hidden", logueado); // toggle = añadir/quitar clase
   }
-  if (productosMostrar) {
-        productosMostrar.classList.toggle("hidden", logueado);}
+  if (eventosMostrar) {
+        eventosMostrar.classList.toggle("hidden", logueado);}
 
-  // 🏪 TIENDA para usuarios logados sólo se mostrara si esta logged
+  // 🏪 eventos para usuarios logados sólo se mostrara si esta logged
   //hidden está definido en style y es una propiedad del contenedor
-  if (tiendaSection) {
-    tiendaSection.classList.toggle("hidden", !logueado); // !logged = no logado 
+  if (eventosSection) {
+    eventosSection.classList.toggle("hidden", !logueado); // !logged = no logado 
     //toggle es un método de classList que añade o quita una clase CSS a un elemento del DOM.
     //con dos parametros significa ejecuta ese estilo segun la condicion
 
 
     if (logueado) {
-      // Si está logueado, cargar datos de la tienda
+      // Si está logueado, cargar datos de la eventos
       cargarCarrito();        // Restaurar carrito desde localStorage
-      cargarProductosTienda(); // Mostrar productos con botón "Comprar"
+      cargareventoseventos(); // Mostrar eventos con botón "Comprar"
       
     }
   }
@@ -319,345 +465,453 @@ function configurarEventosLogin() {
   }
 }
 
+
+// =============================
+// 🏪 eventos PARA EL CONTENEDOR PARA COMPRAR QUE SE ABRE CUANDO EL USUARIO SE LOGA 
+// (CON botón de comprar - solo usuarios logueados)
+// =============================
+
+/**
+ * cargareventoseventos() - Carga eventos para usuarios logueados
+ * 
+ * ¿Diferencia con cargareventos()?
+ * - cargareventos() = vista pública (SIN botón comprar)
+ * - cargareventoseventos() = vista privada (CON botón comprar)
+ * 
+ * ¿Misma API?
+ * - Sí, usa la misma API /api/eventos
+ * - Pero muestra diferente HTML (con botones)
+ * /**
+ * obtenereventos() → Pide eventos al backend y devuelve la lista
+ */
+async function obtenereventos() {
+  try {
+    const respuesta = await fetch(`${URL_API}/eventos`);
+    const datos = await respuesta.json();
+
+    if (respuesta.ok && datos.data) {
+      return datos.data; // ← devolvemos la lista
+    } else {
+      console.error("Error al cargar eventos");
+      return []; // devuelvo lista vacía para evitar errores
+    }
+  } catch (error) {
+    console.error("Error de conexión:", error);
+    return []; // evitamos que la app se rompa
+  }
+}
+
+ 
+async function cargareventoseventos() {
+  const lista = await obtenereventos(); 
+  mostrareventoseventos(lista); 
+}
+
+
+/**
+ * mostrareventoseventos() - Muestra eventos que ya teniamos y le agrega el  botón "Agregar al carrito"
+ * 
+ * @param {Array} lista - Array de eventos
+ * 
+ * ¿Diferencias con mostrareventos()?
+ * 1. Incluye botón "Agregar al carrito"
+ * 2. Añade event listeners a los botones
+ * 3. Usa data-attributes para pasar datos al botón
+ * 
+ * ¿Qué son data-attributes?
+ * - data-id="1" → se puede leer con btn.dataset.id
+ * - Forma estándar de guardar datos en elementos HTML
+ */
+function mostrareventoseventos(lista) {
+  const contenedor = document.getElementById("eventoseventos");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = lista.map(evento => `
+    <div class="event-card">
+      <img src="./images/foto2.png" class="event-image" alt="${evento.nombre}">
+      <h3>${evento.nombre}</h3>
+      <p>${evento.descripcion || ""}</p>
+      <p><strong>${evento.precio}€</strong></p>
+      <p>Stock: ${evento.stock}</p>
+      <button
+        class="btn-agregar"
+        data-id="${evento.id}"
+        data-nombre="${evento.nombre}"
+        data-precio="${evento.precio}"
+      >
+        🛒 Agregar al carrito
+      </button>
+    </div>
+  `).join("");
+
+  // 🎯 EVENTOS PARA BOTONES "Agregar al carrito"
+  // Buscar todos los botones que acabamos de crear
+  const botones = contenedor.querySelectorAll(".btn-agregar");
+  
+  botones.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Leer datos del botón (data-attributes)
+      const evento = {
+        id: Number(btn.dataset.id),        // "1" → 1
+        nombre: btn.dataset.nombre,        // "Camiseta"
+        precio: Number(btn.dataset.precio) // "20" → 20
+      };
+      
+      agregarAlCarrito(evento);
+    });
+  });
+}
+
+// =============================
+// ✅ FINALIZAR COMPRA (ENVIAR PEDIDO AL BACKEND)
+// =============================
+
+/**
+ * finalizarCompra() - Convierte carrito en pedido del backend
+ * 
+ * ¿Cuándo se ejecuta?
+ * - Usuario hace click en "Finalizar compra"
+ * 
+ * ¿Qué hace?
+ * 1. Validaciones: carrito vacío, usuario logueado
+ * 2. Convierte carrito a formato que espera el backend
+ * 3. Envía POST a /api/pedidos
+ * 4. Si éxito: vacía carrito y avisa usuario
+ * 5. Si error: muestra mensaje de error
+ */
+async function finalizarCompra() {
+  // 🔍 VALIDACIONES
+  if (!estado.carrito.items.length) {
+    alert("El carrito está vacío");
+    return;
+  }
+
+  
+
+  // 📋 PREPARAR DATOS PARA EL BACKEND
+  // El controller espera: {eventos: [{evento_id, cantidad, precio}], total}
+  const pedido = {
+    eventos: estado.carrito.items.map(item => ({
+      evento_id: item.id,        // Backend espera "evento_id"
+      cantidad: item.cantidad,
+      precio: item.precio
+    })),
+    total: estado.carrito.total
+  };
+
+  try {
+    // 🚀 ENVIAR PEDIDO AL BACKEND
+    const respuesta = await fetch(`${URL_API}/pedidos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${estado.token}` // Autenticación requerida
+      },
+      body: JSON.stringify(pedido)
+    });
+
+    const datos = await respuesta.json();
+    console.log("📦 Respuesta crear pedido:", respuesta.status, datos);
+
+    if (respuesta.ok) {
+      // ✅ PEDIDO EXITOSO
+      alert("✅ Pedido realizado con éxito");
+      
+      // Vaciar carrito
+      estado.carrito = { items: [], total: 0 };
+      guardarCarrito(); // Actualizar localStorage y UI
+    } else {
+      // ❌ ERROR EN PEDIDO
+      alert(datos.message || "Error al crear el pedido");
+    }
+    
+  } catch (error) {
+    // ❌ ERROR DE CONEXIÓN
+    console.error("❌ Error al finalizar compra:", error);
+    alert("No se pudo conectar con el servidor");
+  }
+}
+
+// =============================
+// 🧺 PINTAR CARRITO EN LA COLUMNA DERECHA
+// =============================
+
+/**
+ * pintarCarrito() - Muestra items del carrito en la interfaz
+ * 
+ * ¿Dónde se muestra?
+ * - En el elemento <div id="carritoItems">
+ * - Típicamente en una columna lateral o modal
+ * 
+ * ¿Qué muestra?
+ * - Lista de eventos en el carrito
+ * - Cantidad × precio de cada uno
+ * - Botón para eliminar cada evento
+ */
+function pintarCarrito() {
+  const contenedor = document.getElementById("carritoItems");
+  if (!contenedor) return;
+
+  // 🛒 CARRITO VACÍO
+  if (!estado.carrito.items.length) {
+    contenedor.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío</p>';
+    return;
+  }
+
+  // 🛒 CARRITO CON eventos
+  contenedor.innerHTML = estado.carrito.items.map(item => `
+    <div class="carrito-item">
+      <span class="carrito-item-nombre">${item.nombre}</span>
+      <span class="carrito-item-cantidad">${item.cantidad} x ${item.precio}€</span>
+      <button class="carrito-borrar" data-id="${item.id}">🗑️</button>
+    </div>
+  `).join("");
+
+  // 🗑️ EVENTOS PARA BOTONES DE ELIMINAR
+  const botonesBorrar = contenedor.querySelectorAll(".carrito-borrar");
+  botonesBorrar.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = Number(btn.dataset.id);
+      eliminarDelCarrito(id);
+    });
+  });
+}
+
+
+// =============================
+// 🛒 CARRITO (LOCALSTORAGE). Este codigo se va a ejecutar cuando alguien ha salido sin cerrar y vuelve a entrar
+//es como restaurar
+// =============================
+
+/**
+ * cargarCarrito() - Restaura carrito desde localStorage cuando el usuario no ha cerrado la sesión pero ha salido de la pagina
+ * 
+ * ¿Cuándo se ejecuta?
+ * - Al hacer login
+ * - Al recargar página (si ya estaba logueado)
+ * 
+ * ¿Por qué localStorage?
+ * - El carrito se mantiene aunque recargues la página
+ * - Mejor experiencia de usuario
+ */
+function cargarCarrito() {
+  const guardado = localStorage.getItem("carrito");
+  
+  if (guardado) {
+    // Hay carrito guardado: restaurarlo
+    estado.carrito = JSON.parse(guardado);
+  } else {
+    // No hay carrito: crear uno vacío
+    estado.carrito = { items: [], total: 0 };
+  }
+  
+  actualizarTotalCarrito(); // Calcular total
+  pintarCarrito();         // Mostrar en pantalla
+}
+
+/**
+ * guardarCarrito() - Guarda carrito en localStorage y actualiza UI
+ * 
+ * ¿Cuándo se ejecuta?
+ * - Al agregar evento
+ * - Al eliminar evento
+ * - Al finalizar compra (vaciar carrito)
+ */
+function guardarCarrito() {
+  localStorage.setItem("carrito", JSON.stringify(estado.carrito));
+  actualizarTotalCarrito(); // Recalcular total
+  pintarCarrito();         // Actualizar visualización
+}
+
+/**
+ * agregarAlCarrito() - Añade evento al carrito
+ * 
+ * @param {Object} evento - {id, nombre, precio}
+ * 
+ * ¿Qué hace?
+ * 1. Busca si el evento ya está en el carrito
+ * 2. Si está: aumenta cantidad
+ * 3. Si NO está: lo añade con cantidad = 1
+ * 4. Guarda y actualiza
+ */
+function agregarAlCarrito(evento) {
+  // ¿Ya existe este evento en el carrito? añade una unidad a la que ya habia
+  const existente = estado.carrito.items.find(item => item.id === evento.id);
+
+  if (existente) {
+    // ✅ evento existe: aumentar cantidad
+    existente.cantidad += 1;
+  } else {
+    // 🆕 evento nuevo: añadir al carrito
+    estado.carrito.items.push({
+      id: evento.id,
+      nombre: evento.nombre,
+      precio: evento.precio,
+      cantidad: 1
+    });
+  }
+
+  guardarCarrito();
+  console.log("🛒 Carrito:", estado.carrito); // Debug
+  alert(`Añadido ${evento.nombre} al carrito`);
+}
+
+/**
+ * eliminarDelCarrito() - Quita completamente un evento
+ * 
+ * @param {number} id - ID del evento a eliminar
+ * 
+ * ¿Qué hace?
+ * - Usa .filter() para crear nuevo array sin ese evento
+ * - Guarda el carrito actualizado
+ */
+function eliminarDelCarrito(id) {
+  // .filter() = "crear nuevo array sin los elementos que cumplan condición"
+  //Quédate con todos los elementos cuyo id NO sea igual al que quiero borrar
+  estado.carrito.items = estado.carrito.items.filter(item => item.id !== id);
+  guardarCarrito();
+}
+
+/**
+ * actualizarTotalCarrito() - Calcula precio total del carrito
+ * 
+ * ¿Cómo calcula?
+ * - Por cada evento: precio × cantidad
+ * - Suma todos los subtotales
+ * - Usa .reduce() para acumular
+ * - Actualiza el span #totalCarrito en el HTML
+ */
+function actualizarTotalCarrito() {
+  // reduce() va sumando (precio × cantidad) de cada evento para obtener el total final
+//es un metodo muy potente de js para arrays que permite acumular en una sola variable
+  const total = estado.carrito.items
+    .reduce((suma, item) => suma + item.precio * item.cantidad, 0);
+    //        ↑      ↑                    ↑
+    //   acumulador  item actual    operación
+
+  estado.carrito.total = total;
+
+  // Mostrar en el HTML
+  const totalSpan = document.getElementById("totalCarrito");
+  if (totalSpan) {
+    totalSpan.textContent = total.toFixed(2); // .toFixed(2) = 2 decimales
+  }
+}
+
+
+
+/* CURSOS */
+async function verCursosJSON() {
+  try {
+    // fetch() = "Ve y trae los datos de esta URL"
+    const respuesta = await fetch(`${URL_API}/cursos`);
+    const datos = await respuesta.json();
+    
+    // Mostrar los datos en formato JSON legible
+    const salida = document.getElementById("listaCursos");
+    if (salida) {
+      salida.textContent = JSON.stringify(datos, null, 2); // null, 2 = formato bonito
+    }
+  } catch (error) {
+    // Si algo sale mal (internet, servidor caído, etc.)
+    console.error("Error al obtener JSON:", error);
+  }
+}
+
+/**
+ * cargarCursos() - Carga y muestra Cursos en formato de tarjetas
+ */
+async function cargarCursos() {
+  try {
+    const respuesta = await fetch(`${URL_API}/cursos`);
+    const datos = await respuesta.json();
+
+    // Verificar que la petición fue exitosa Y que hay datos
+    if (respuesta.ok && datos.data) {
+      mostrarCursos(datos.data); // datos.data = array de Cursos
+    } else {
+      console.error("Error al cargar Cursos");
+    }
+  } catch (error) {
+    console.error("Error de conexión:", error);
+  }
+}
+
+/**
+ * mostrarCursos() - Convierte array de Cursos en HTML
+ * 
+ * @param {Array} lista - Array de eventos del backend
+ *
+ */
+function mostrarCursos(lista) {
+  const contenedor = document.getElementById("cursos");
+  if (!contenedor) return; // Si no existe el elemento, salir
+
+  // .map() = "Por cada Curso, crear este HTML"
+  contenedor.innerHTML = lista.map(cursos => `
+    <div class="curso-card">
+      <img src="./images/foto.png" class="curso-image" alt="${cursos.id_curso}">
+      <h3>${cursos.nombre_curso || ""}</h3>
+      <p>${cursos.id_curso || ""}</p>
+      <p>${cursos.id_especialidad|| ""}</p>
+      <p>${cursos.fecha_realizacion || ""}</p>
+      <p>${cursos.FechaCalculadaAño || ""}</p>
+      <p>${cursos.practicas || ""}</p>
+      <p>${cursos.id_practicas || ""}</p>
+      <p>${cursos.duracion_curso || ""}</p>
+      <p>${cursos.conocimientos_adquiridos || ""}</p>
+      <p>${cursos.Centro_Estudio || ""}</p>
+      <p>${cursos.nombre || ""}</p>
+      <p>${cursos.familia || ""}</p>
+      <p>${cursos.aplicaciones || ""}</p>
+      
+    </div>
+  `).join(""); // .join("") = unir todo sin separadores
+}
+
+
+// =============================
+// 🚀 ARRANQUE DE LA APLICACIÓN
+// =============================
+
+/**
+ * DOMContentLoaded - Punto de inicio de la aplicación
+ * 
+ * ¿Por qué DOMContentLoaded?
+ * - Se ejecuta cuando el HTML está listo
+ * - Antes de este evento, getElementById() podría fallar
+ * - Garantiza que todos los elementos HTML existen
+ * 
+ * ¿Qué inicializa?
+ * 1. Event listeners para botones estáticos
+ * 2. Carga inicial de eventos públicos
+ * 3. Restauración de sesión guardada
+ * 4. Configuración de eventos de login
+ * 5. Primera visualización de interfaz
+ */
 document.addEventListener("DOMContentLoaded", () => {
   console.log("🚀 App lista");
 
+  // 🔘 BOTÓN "VER JSON"
+  const btnVerJSON = document.getElementById("verJSON");
+  if (btnVerJSON) {
+    btnVerJSON.addEventListener("click", verJSON);
+  }
+  // 🔘 BOTÓN "VER CURSOS JSON"
+  const btnVerCursosJSON = document.getElementById("verCursosJSON");
+  if (btnVerCursosJSON) {
+    btnVerCursosJSON.addEventListener("click", verCursosJSON);
+  }
+  // 🔘 BOTÓN "FINALIZAR COMPRA"
+  const btnFinalizar = document.getElementById("finalizarCompra");
+  if (btnFinalizar) {
+    btnFinalizar.addEventListener("click", finalizarCompra);
+  }
+
   // 📋 SECUENCIA DE INICIALIZACIÓN
-  
-  cargareventos();        // 1. Cargar productos públicos (siempre visible)
+  cargarCursos()
+  cargareventos();        // 1. Cargar eventos públicos (siempre visible)
   cargarSesionGuardada();   // 2. Restaurar sesión si existía
   configurarEventosLogin(); // 3. Conectar formularios de login/registro
   mostrarInterfaz();        // 4. Mostrar interfaz según estado de login
 });
-
-
-
-
-
-// === HELPERS ===
-        // function getToken() { return localStorage.getItem("eventflow_token"); }
-        // function setToken(token) { localStorage.setItem("eventflow_token", token); }
-        // function clearToken() { localStorage.removeItem("eventflow_token"); }
-
-        // async function apiFetch(path, options = {}) {
-        //     const token = getToken();
-        //     const headers = { "Content-Type": "application/json" };
-        //     if (token) headers["Authorization"] = `Bearer ${token}`;
-
-        //     const res = await fetch(API_BASE + path, { ...options, headers });
-
-        //     if (!res.ok) {
-        //         const data = await res.json().catch(() => ({}));
-        //         throw new Error(data.error || "Error del servidor");
-        //     }
-        //     if (res.status === 204) return null;
-        //     return res.json();
-        // }
-
-        function showAlert(message, isError = false) {
-            const alert = document.getElementById("alert");
-            alert.textContent = message;
-            alert.style.background = isError ? "#e53935" : "#3949ab";
-            alert.classList.add("show");
-            setTimeout(() => alert.classList.remove("show"), 4000);
-        }
-
-        function updateAuthUI() {
-            document.getElementById("auth-section").style.display = currentUser ? "none" : "flex";
-            document.getElementById("app-section").style.display = currentUser ? "block" : "none";
-            document.getElementById("logout-btn").style.display = currentUser ? "inline-block" : "none";
-            document.getElementById("user-role").textContent =
-                currentUser ? `${currentUser.nombre} (${currentUser.rol.toUpperCase()})` : "";
-        }
-
-        // === USUARIO ACTUAL ===
-        // async function cargarUsuarioActual() {
-        //     if (!getToken()) {
-        //         currentUser = null;
-        //         updateAuthUI();
-        //         return;
-        //     }
-
-        //     try {
-        //         currentUser = await apiFetch("/api/usuarios/me");
-        //         updateAuthUI();
-        //         await cargarEventos();
-        //     } catch (err) {
-        //         clearToken();
-        //         currentUser = null;
-        //         updateAuthUI();
-        //         showAlert("Sesión expirada", true);
-        //     }
-        // }
-
-//         // === EVENTOS ===
-//  async function cargareventos() {
-//   try {
-//     const respuesta = await fetch(`${URL_API}/eventos`);
-//     const datos = await respuesta.json();
-
-//     // Verificar que la petición fue exitosa Y que hay datos
-//     if (respuesta.ok && datos.data) {
-//       mostrareventos(datos.data); // datos.data = array de eventos
-//     } else {
-//       console.error("Error al cargar eventos");
-//       showAlert(err.message, true);
-//     }
-//   } catch (error) {
-//     console.error("Error de conexión:", error);
-//     showAlert(err.message, true);
-//   }
-// }
-        // async function cargarEventos() {
-        //     try {
-        //         eventos = await apiFetch("/api/eventos");
-        //         renderEventos();
-        //     } catch (err) {
-        //         showAlert(err.message, true);
-        //         document.getElementById("eventos-list").textContent = "Error al cargar eventos";
-        //     }
-//         // }
-// function mostrareventos(lista) {
-//   const contenedor = document.getElementById("eventos-list");
-//   const esMio = currentUser && ev.creadorId === currentUser.id;
-//   const soyAdmin = currentUser?.rol === "admin";
-//   const estoyInscrito = currentUser && ev.asistentesIds?.includes(currentUser.id);
-//   if (!contenedor) return; // Si no existe el elemento, salir
-//     if (!eventos.length) {
-//         contenedor.innerHTML = '<div style="padding:2rem;text-align:center;color:#666;">No hay eventos disponibles 😴</div>';
-//         return;
-//         }
-// const actions = card.querySelector(".event-actions");
-
-//   // Inscribirse/desinscribirse (solo si NO es mío)
-//   if (currentUser && !esMio) {
-//       const btn = document.createElement("button");
-//       btn.className = `btn btn-small ${estoyInscrito ? "btn-secondary" : "btn-primary"}`;
-//       btn.textContent = estoyInscrito ? "❌ Desinscribirse" : "✅ Inscribirse";
-//       btn.onclick = () => toggleInscripcion(ev.id, estoyInscrito);
-//       actions.appendChild(btn);
-//       }
-//   // Editar/Eliminar (mío O admin)
-//   if (currentUser && (esMio || soyAdmin)) {
-//       const editBtn = document.createElement("button");
-//       editBtn.className = "btn btn-small btn-secondary";
-//       editBtn.textContent = "✏️ Editar";
-//       editBtn.onclick = () => rellenarFormulario(ev);
-//       actions.appendChild(editBtn);
-//       const delBtn = document.createElement("button");
-//       delBtn.className = "btn btn-small btn-danger";
-//       delBtn.textContent = "🗑️ Eliminar";
-//       delBtn.onclick = () => eliminarEvento(ev.id);
-//       actions.appendChild(delBtn);
-//       }
-//       contenedor.appendChild(card);
-
-//       contenedor.innerHTML = "";
-//   // .map() = "Por cada evento, crear este HTML"
-//   contenedor.innerHTML = lista.map(evento => `
-//     <div class="event-card">
-//         <div class="event-header">
-//             <div class="event-title">${evento.titulo}</div>
-//             <div>
-//               ${soyAdmin ? '<span class="badge badge-admin">ADMIN</span>' : ""}
-//               ${esMio ? '<span class="badge badge-mine">MÍO</span>' : ""}
-//               ${estoyInscrito ? '<span class="badge badge-inscrito">INSCRITO</span>' : ""}
-//             </div>
-//         </div>
-//       <img src="./images/foto.png" class="product-image" alt="${evento.titulo}">
-//       <h3>${evento.titulo}</h3>
-//       <p class="event-meta">${evento.descripcion || ""}</p>
-//       <p class="event-meta"><strong>${evento.fecha}€</strong></p>
-//       <p class="event-meta">Lugar: ${evento.lugar}</p>
-//       <div class="event-actions"></div>
-//     </div>
-//   `).join(""); // .join("") = unir todo sin separadores  
-// }
-
-// function renderEventos() {
-//             const container = document.getElementById("eventos-list");
-//             if (!eventos.length) {
-//                 container.innerHTML = '<div style="padding:2rem;text-align:center;color:#666;">No hay eventos disponibles 😴</div>';
-//                 return;
-//             }
-
-//             container.innerHTML = "";
-//             eventos.forEach(ev => {
-//                 const esMio = currentUser && ev.creadorId === currentUser.id;
-//                 const soyAdmin = currentUser?.rol === "admin";
-//                 const estoyInscrito = currentUser && ev.asistentesIds?.includes(currentUser.id);
-
-//                 const card = document.createElement("div");
-//                 card.className = "event-card";
-
-//                 card.innerHTML = `
-//           <div class="event-header">
-//             <div class="event-title">${ev.titulo}</div>
-//             <div>
-//               ${soyAdmin ? '<span class="badge badge-admin">ADMIN</span>' : ""}
-//               ${esMio ? '<span class="badge badge-mine">MÍO</span>' : ""}
-//               ${estoyInscrito ? '<span class="badge badge-inscrito">INSCRITO</span>' : ""}
-//             </div>
-//           </div>
-//           <div class="event-meta"><strong>📅 ${ev.fecha}</strong> - ${ev.lugar}</div>
-//           <div class="event-meta">${ev.descripcion}</div>
-//           <div class="event-actions"></div>
-//         `;
-
-//                 const actions = card.querySelector(".event-actions");
-
-//                 // Inscribirse/desinscribirse (solo si NO es mío)
-//                 if (currentUser && !esMio) {
-//                     const btn = document.createElement("button");
-//                     btn.className = `btn btn-small ${estoyInscrito ? "btn-secondary" : "btn-primary"}`;
-//                     btn.textContent = estoyInscrito ? "❌ Desinscribirse" : "✅ Inscribirse";
-//                     btn.onclick = () => toggleInscripcion(ev.id, estoyInscrito);
-//                     actions.appendChild(btn);
-//                 }
-
-//                 // Editar/Eliminar (mío O admin)
-//                 if (currentUser && (esMio || soyAdmin)) {
-//                     const editBtn = document.createElement("button");
-//                     editBtn.className = "btn btn-small btn-secondary";
-//                     editBtn.textContent = "✏️ Editar";
-//                     editBtn.onclick = () => rellenarFormulario(ev);
-//                     actions.appendChild(editBtn);
-
-//                     const delBtn = document.createElement("button");
-//                     delBtn.className = "btn btn-small btn-danger";
-//                     delBtn.textContent = "🗑️ Eliminar";
-//                     delBtn.onclick = () => eliminarEvento(ev.id);
-//                     actions.appendChild(delBtn);
-//                 }
-
-//                 container.appendChild(card);
-//             });
-//         }
-
-async function toggleInscripcion(eventoId, yaInscrito) {
-    try {
-    await apiFetch(`/api/asistentes/eventos/${eventoId}/inscribirse`, {
-      method: yaInscrito ? "DELETE" : "POST"
-    });
-    showAlert(yaInscrito ? "Desinscrito correctamente" : "¡Inscrito! 🎉");
-    await cargarEventos();
-    } catch (err) {
-    showAlert(err.message, true);
-    }
-}
-
-        function rellenarFormulario(ev) {
-            document.getElementById("evento-id").value = ev.id;
-            document.getElementById("evento-titulo").value = ev.titulo;
-            document.getElementById("evento-descripcion").value = ev.descripcion;
-            document.getElementById("evento-fecha").value = ev.fecha.split("T")[0];
-            document.getElementById("evento-lugar").value = ev.lugar;
-            document.getElementById("evento-cancelar").style.display = "inline-block";
-        }
-
-        async function eliminarEvento(id) {
-            if (!confirm("¿Estás seguro de eliminar este evento?")) return;
-            try {
-                await apiFetch(`/eventos/${id}`, { method: "DELETE" });
-                showAlert("Evento eliminado ✅");
-                await cargarEventos();
-            } catch (err) {
-                showAlert(err.message, true);
-            }
-        }
-
-        // === EVENT LISTENERS ===
-        document.addEventListener("DOMContentLoaded", () => {
-            // Login
-            document.getElementById("login-form").onsubmit = async e => {
-                e.preventDefault();
-                try {
-                    const data = await apiFetch("/api/auth/login", {
-                        method: "POST",
-                        body: JSON.stringify({
-                            email: document.getElementById("login-email").value,
-                            password: document.getElementById("login-password").value
-                        })
-                    });
-                    setToken(data.token);
-                    showAlert("¡Bienvenido! 🎉");
-                    await cargarUsuarioActual();
-                } catch (err) {
-                    showAlert(err.message, true);
-                }
-            };
-
-            // Register
-            document.getElementById("register-form").onsubmit = async e => {
-                e.preventDefault();
-                try {
-                    await apiFetch("/api/auth/register", {
-                        method: "POST",
-                        body: JSON.stringify({
-                            nombre: document.getElementById("register-name").value,
-                            email: document.getElementById("register-email").value,
-                            password: document.getElementById("register-password").value
-                        })
-                    });
-                    showAlert("¡Usuario creado! Ahora inicia sesión 👆");
-                    document.getElementById("register-form").reset();
-                } catch (err) {
-                    showAlert(err.message, true);
-                }
-            };
-
-            // Evento form
-            document.getElementById("evento-form").onsubmit = async e => {
-                e.preventDefault();
-                const id = document.getElementById("evento-id").value;
-
-                const data = {
-                    titulo: document.getElementById("evento-titulo").value,
-                    descripcion: document.getElementById("evento-descripcion").value,
-                    fecha: document.getElementById("evento-fecha").value,
-                    lugar: document.getElementById("evento-lugar").value,
-                    categoria: document.getElementById("evento-categoria").value,
-                    creador_id: currentUser.id  // 👈 AQUÍ se pone automáticamente según el usuario logueado
-                };
-
-                try {
-                    if (id) {
-                        await apiFetch(`/api/eventos/${id}`, {
-                            method: "PUT",
-                            body: JSON.stringify(data)
-                        });
-                        showAlert("Evento actualizado ✅");
-                    } else {
-                        await apiFetch("/api/eventos", {
-                            method: "POST",
-                            body: JSON.stringify(data)
-                        });
-                        showAlert("¡Nuevo evento creado! 🎉");
-                    }
-
-                    document.getElementById("evento-form").reset();
-                    document.getElementById("evento-id").value = "";
-                    document.getElementById("evento-cancelar").style.display = "none";
-                    await cargarEventos();
-                } catch (err) {
-                    showAlert(err.message, true);
-                }
-            };
-
-
-            document.getElementById("evento-cancelar").onclick = () => {
-                document.getElementById("evento-form").reset();
-                document.getElementById("evento-id").value = "";
-                document.getElementById("evento-cancelar").style.display = "none";
-            };
-
-            document.getElementById("logout-btn").onclick = () => {
-                clearToken();
-                currentUser = null;
-                updateAuthUI();
-                showAlert("Sesión cerrada");
-            };
-
-            // Inicializar
-            cargarUsuarioActual();
-        });

@@ -55,8 +55,12 @@ export function verificarToken(req, res, next) {
   // ==========================================
   
   // Leer la cabecera Authorization
-  const authHeader = req.headers.authorization;
+  // const authHeader = req.headers.authorization;
 
+  const authHeader =
+    req.headers.authorization ||
+    req.query.token ||
+    req.cookies?.token;
   // Verificar que la cabecera existe
   if (!authHeader) {
     return res.status(401).json({ 
