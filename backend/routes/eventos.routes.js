@@ -22,4 +22,6 @@ router.delete("/:id", verifyToken, canManageEvents, EventosController.remove);
 // router.put("/:id", EventosController.update);
 // router.delete("/:id", EventosController.remove);
 
+
+
 export default router;

@@ -1,155 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <link rel="stylesheet" href="styles.css">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>EventFlow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-    <nav class="auth-nav" id="authNav">
-                  <!-- 🔄 Este contenido se genera dinámicamente por JavaScript -->
-            </nav>
-
-<section class="auth-section" id="authSection">
-                <div class="auth-container">
-                    <div class="auth-form" id="loginForm">
-                        <h3>🔑 Iniciar Sesión</h3>
-                        
-                        <form id="loginFormElement">
-                            <div class="form-group">
-                                <label for="loginEmail">Email:</label>
-                                <input type="email" id="loginEmail" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="loginPassword">Contraseña:</label>
-                                <input type="password" id="loginPassword" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                        </form>
-                        
-                        <p class="auth-toggle">
-                            ¿No tienes cuenta? 
-                            <a href="#" id="showRegister">Regístrate aquí</a>
-                        </p>
-                    </div>
-
-                    <div class="auth-form hidden" id="registerForm">
-                        <h3>📝 Crear Cuenta</h3>
-                        
-                        <form id="registerFormElement">
-                            <div class="form-group">
-                                <label for="registerNombre">Nombre completo:</label>
-                                <input type="text" id="registerNombre" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerEmail">Email:</label>
-                                <input type="email" id="registerEmail" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerPassword">Contraseña:</label>
-                                <input type="password" id="registerPassword" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Crear Cuenta</button>
-                        </form>
-                        
-                        <p class="auth-toggle">
-                            ¿Ya tienes cuenta? 
-                            <a href="#" id="showLogin">Inicia sesión aquí</a>
-                        </p>
-                    </div>
-                </div>
-            </section>
-            
-    <h1>📦 Ver datos JSON </h1>
-    <button id="verJSON">Ver JSON</button>
-<pre style="background-color: black; color: rgb(3, 212, 3);" id="listaeventos"></pre>
- 
-<!-- App -->
-    <section id="app-section" style="display:none;">
-      <div class="grid">
-        <!-- Crear / editar eventos (visible a user y admin) -->
-        <div class="card">
-  <h2>✨ Nuevo Evento</h2>
-  <form id="evento-form">
-    <input type="hidden" id="evento-id" />
-    <input type="text" id="evento-titulo" placeholder="Título del evento" required />
-    <textarea id="evento-descripcion" placeholder="Descripción completa" required></textarea>
-    <input type="date" id="evento-fecha" required />
-    <input type="text" id="evento-lugar" placeholder="Lugar / Dirección" required />
-    <input type="text" id="evento-categoria" placeholder="Categoría (charla, taller, meetup...)" required />
-    <!-- creador_id NO va en el formulario, se pone en el backend/JS según el usuario logueado -->
-    <button type="submit" class="btn btn-primary">💾 Guardar Evento</button>
-    <button type="button" id="evento-cancelar" class="btn btn-secondary" style="display:none;">❌ Cancelar</button>
-  </form>
-</div>
-
-        <!-- Listado de eventos -->
-        <div class="card">
-          <h2>Eventos</h2>
-          <div id="event-card"></div>
-        </div>
-      </div>
-    </section>
-
-    <div id="alert" class="alert" style="display:none;"></div>
-  
-
-<!-- 🟢 SECCIÓN PÚBLICA: listado de eventos SIN botón de compra -->
- <!-- la seccion eventosMostrar se ocultará cuando estemos logado para solo ver los eventos en eventos.-->
-<section id="eventosMostrar"> 
-  <h2>📦 Listado de eventos</h2>
-  <div id="eventos">Aquí deberían aparecer los eventos
-    
-        <!-- Listado de eventos -->
-        <div class="card">
-          <h2>Eventos</h2>
-          <div id="event-card"></div>
-        </div>
-      </div>
+<header class="header">
+  <div class="container header-content">
+    <div class="logo">
+      <h1>EventFlow</h1>
+      <p>Gestión de eventos</p>
+    </div>
+    <nav id="authNav" class="auth-nav"></nav>
   </div>
-</section>
-<!-- 🛒 SECCIÓN PRIVADA: solo visible cuando el usuario está logueado -->
-<section class="eventos-usuario" id="eventosSection">
-  <h2>🛒 eventos (solo usuarios registrados)</h2>
+</header>
 
-  <div class="eventos-layout">
-    <!-- Columna izquierda: eventos -->
-    <div class="eventos-eventos">
-      <h3>eventos disponibles</h3>
-      <div id="eventoseventos"></div>
+<main class="container">
+
+  <!-- AUTH -->
+  <section id="authSection" class="auth-container">
+    <div class="auth-form">
+      <h3>Iniciar sesión</h3>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required>
+        <input type="password" id="loginPassword" placeholder="Contraseña" required>
+        <button class="btn btn-primary">Entrar</button>
+      </form>
     </div>
 
-    <!-- Columna derecha: carrito -->
-    <aside class="eventos-carrito">
-      <h3>🧺 Tu carrito</h3>
+    <div class="auth-form">
+      <h3>Registro</h3>
+      <form id="registerForm">
+        <input type="text" id="registerNombre" placeholder="Nombre" required>
+        <input type="email" id="registerEmail" placeholder="Email" required>
+        <input type="password" id="registerPassword" placeholder="Contraseña" required>
+        <button class="btn btn-primary">Registrarse</button>
+      </form>
+    </div>
+  </section>
 
-      <!-- Aquí se pintan los eventos del carrito -->
-      <div id="carritoItems"></div>
+  <!-- ADMIN -->
+  <section id="adminSection" class="hidden">
+    <h2>✨ Nuevo Evento</h2>
+    <form id="eventoForm" class="auth-form">
+      <input type="text" id="titulo" placeholder="Título" required>
+      <textarea id="descripcion" placeholder="Descripción" required></textarea>
+      <input type="datetime-local" id="fecha" required>
+      <input type="text" id="lugar" placeholder="Lugar" required>
+      <input type="text" id="categoria" placeholder="Categoría" required>
+      <button class="btn btn-primary">Guardar evento</button>
+    </form>
+  </section>
 
-      <!-- Total del carrito debajo de la lista -->
-      <p class="carrito-total">
-        Total carrito: <span id="totalCarrito">0.00</span> €
-      </p>
+  <!-- EVENTOS -->
+  <section id="eventosSection" class="hidden">
+    <h2>📅 Eventos</h2>
+    <div id="eventosGrid" class="event-grid"></div>
+  </section>
 
-      <!-- Botón finalizar compra debajo del total -->
-      <button id="finalizarCompra" class="btn-finalizar">
-        ✅ Finalizar compra
-      </button>
-    </aside>
-  </div>
-</section>
+</main>
 
-
+<div id="toast" class="toast hidden"></div>
 
 <script src="app.js"></script>
 </body>
+
 
 </html>

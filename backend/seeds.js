@@ -12,10 +12,10 @@ async function seedDB() {
     
     // Insertar eventos
     const eventos = [
-      ["Inicio APP", "Creacion del usuario Admin", "2025-01-01 18:00:00", "Admin", ],
-      ["Taller de Fotografía", "Aprende fotografía profesional", "2025-03-10 18:00:00", "Taller"],
-      ["Concierto Acústico", "Música en vivo", "2025-03-15 20:00:00", "Música"],
-      ["Charla de Tecnología", "Tendencias en IA", "2025-04-02 17:30:00", "Conferencia"]
+      ["Inicio APP", "Creacion del usuario Admin", "2025-01-01 18:00:00", "Musica", 1, "Sevilla" ],
+      ["Taller de Fotografía", "Aprende fotografía profesional", "2025-03-10 18:00:00", "Taller", 1, "Sevilla"],
+      ["Concierto Acústico", "Música en vivo", "2025-03-15 20:00:00", "Música", 1, "Sevilla"],
+      ["Charla de Tecnología", "Tendencias en IA", "2025-04-02 17:30:00", "Conferencia", 1, "Sevilla"]
     ];
 
     for (const ev of eventos) {

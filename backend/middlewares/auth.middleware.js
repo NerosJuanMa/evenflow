@@ -49,6 +49,7 @@ import jwt from "jsonwebtoken";
  * - 401: Formato de token no válido (debe ser "Bearer <token>")
  * - 401: Token JWT no válido o expirado
  */
+
 export function verificarToken(req, res, next) {
   // ==========================================
   // PASO 1: Extraer token de la cabecera
@@ -91,6 +92,7 @@ export function verificarToken(req, res, next) {
   try {
     // Verificar el token con la clave secreta del entorno
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
 
     // ==========================================
     // PASO 4: Preparar datos del usuario
